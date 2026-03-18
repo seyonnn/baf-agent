@@ -1,47 +1,38 @@
 import os
+import uuid
+
+from ..baf.baf_wrapper import baf_list_dir, baf_read_file  # type: ignore
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 STUDY_DIR = os.path.join(BASE_DIR, "data", "Study_Materials")
 OUTPUT_DIR = os.path.join(BASE_DIR, "data")
 
 
-def list_study_files():
-    if not os.path.isdir(STUDY_DIR):
-        raise FileNotFoundError(f"Study directory not found: {STUDY_DIR}")
-
-    files = []
-    for fname in os.listdir(STUDY_DIR):
-        fpath = os.path.join(STUDY_DIR, fname)
-        if os.path.isfile(fpath):
-            files.append(fpath)
-    return sorted(files)
+def list_study_files(session_id: str):
+    """List study files via BAF wrapper."""
+    return baf_list_dir(STUDY_DIR, session_id=session_id)
 
 
-def read_file_head(path, max_lines=8):
-    lines = []
-    with open(path, "r", encoding="utf-8") as f:
-        for i, line in enumerate(f):
-            if i >= max_lines:
-                break
-            lines.append(line.rstrip("\n"))
-    return "\n".join(lines)
+def read_file_head_via_baf(path, session_id: str, max_lines=8):
+    """Use BAF to read file and then take first N lines."""
+    full_text = baf_read_file(path, session_id=session_id)
+    lines = full_text.splitlines()
+    return "\n".join(lines[:max_lines])
 
 
-def build_notes_for_query(query: str, output_name: str = "study_notes.txt"):
-    """
-    Very simple behavior:
-    - Ignores query for now (we just log it).
-    - Reads all study files and builds a combined notes file.
-    """
-    files = list_study_files()
+def build_notes_for_query(query: str, output_name: str = "study_notes_with_baf.txt"):
+    session_id = str(uuid.uuid4())
+    print(f"[ExamHelper] Session: {session_id}")
     print(f"[ExamHelper] Query: {query}")
+
+    files = list_study_files(session_id=session_id)
     print(f"[ExamHelper] Found {len(files)} study files in {STUDY_DIR}")
 
     summary_lines = [f"### Quick notes for: {query}", ""]
     for path in files:
         summary_lines.append(f"=== {os.path.basename(path)} ===")
-        summary_lines.append(read_file_head(path))
-        summary_lines.append("")  # blank line
+        summary_lines.append(read_file_head_via_baf(path, session_id=session_id))
+        summary_lines.append("")
 
     summary_text = "\n".join(summary_lines)
 
@@ -54,5 +45,4 @@ def build_notes_for_query(query: str, output_name: str = "study_notes.txt"):
 
 
 if __name__ == "__main__":
-    # For now, hardcode a sample query
-    build_notes_for_query("Unit 1 quick notes", output_name="study_notes_day2.txt")
+    build_notes_for_query("Unit 1 notes (BAF v0)")
