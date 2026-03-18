@@ -30,11 +30,6 @@ FINGERPRINT = {
     "max_bytes_per_http_post": 10 * 1024,  # 10 KB
 }
 
-RISK_THRESHOLDS = {
-    "L2_to_L1": 40,  # suspicious
-    "L1_to_L0": 80,  # highly suspicious
-}
-
 def compute_risk_delta(action_type: str,
                        path_category: str,
                        domain_category: str,
@@ -58,6 +53,52 @@ def compute_risk_delta(action_type: str,
         risk += 20
 
     return risk
+
+# In-memory per-session state (simple, non-persistent)
+SESSION_STATE = {}
+# SESSION_STATE[session_id] = {"risk": int, "level": "L2" | "L1" | "L0"}
+
+RISK_THRESHOLDS = {
+    "L2_to_L1": 40,  # suspicious
+    "L1_to_L0": 80,  # highly suspicious
+}
+
+def _get_session_state(session_id: str):
+    state = SESSION_STATE.get(session_id)
+    if state is None:
+        state = {"risk": 0, "level": "L2"}
+        SESSION_STATE[session_id] = state
+    return state
+
+
+def _update_level_for_state(state: dict):
+    risk = state["risk"]
+    if risk >= RISK_THRESHOLDS["L1_to_L0"]:
+        state["level"] = "L0"
+    elif risk >= RISK_THRESHOLDS["L2_to_L1"]:
+        state["level"] = "L1"
+    else:
+        state["level"] = "L2"
+
+def _build_narrative(action_type: str,
+                     path_category: str,
+                     domain_category: str,
+                     nbytes: int,
+                     level: str,
+                     risk_delta: int) -> str:
+    reasons = []
+    if path_category == "personal":
+        reasons.append("accessed Personal_Docs")
+    if domain_category == "external_unknown":
+        reasons.append("called unknown external domain")
+    if action_type == "http_post" and nbytes > FINGERPRINT["max_bytes_per_http_post"]:
+        reasons.append(f"sent large HTTP payload ({nbytes} bytes)")
+
+    if not reasons:
+        reasons.append("no specific anomaly, baseline update only")
+
+    reason_str = "; ".join(reasons)
+    return f"[BAF] level={level}, risk+={risk_delta}: {reason_str}"
 
 def _ensure_log_header():
     """Create log file with header row if empty / missing."""
@@ -135,9 +176,18 @@ def baf_read_file(path: str,
                   session_id: str,
                   agent_id: str = "exam_helper_v1",
                   encoding: str = "utf-8") -> str:
-    """Read a file via BAF (monitor-only)."""
+    """Read a file via BAF with adaptive autonomy control."""
     path_category = _categorize_path(path)
     domain_category = "none"
+
+    state = _get_session_state(session_id)
+    level = state["level"]
+
+    # Enforce policy before performing the operation
+    if level in {"L1", "L2"} and path_category == "personal":
+        narrative = "[BAF] BLOCK read_file: Personal_Docs access not allowed at current level"
+        print(narrative)
+        raise PermissionError(narrative)
 
     with open(path, "r", encoding=encoding) as f:
         data = f.read()
@@ -153,15 +203,42 @@ def baf_read_file(path: str,
         domain_category=domain_category,
     )
 
-    return data
+    # Update risk and level
+    delta = compute_risk_delta(
+        action_type="read_file",
+        path_category=path_category,
+        domain_category=domain_category,
+        nbytes=nbytes,
+    )
+    if delta:
+        state["risk"] += delta
+        _update_level_for_state(state)
+        narrative = _build_narrative(
+            action_type="read_file",
+            path_category=path_category,
+            domain_category=domain_category,
+            nbytes=nbytes,
+            level=state["level"],
+            risk_delta=delta,
+        )
+        print(narrative)
 
+    return data
 
 def baf_list_dir(path: str,
                  session_id: str,
                  agent_id: str = "exam_helper_v1"):
-    """List directory contents via BAF (monitor-only)."""
+    """List directory contents via BAF with adaptive autonomy."""
     path_category = _categorize_path(path)
     domain_category = "none"
+
+    state = _get_session_state(session_id)
+    level = state["level"]
+
+    if level == "L0" and path_category == "personal":
+        narrative = "[BAF] BLOCK list_dir: Personal_Docs listing not allowed at L0"
+        print(narrative)
+        raise PermissionError(narrative)
 
     entries = []
     for fname in os.listdir(path):
@@ -180,19 +257,34 @@ def baf_list_dir(path: str,
         path_category=path_category,
         domain_category=domain_category,
     )
-    return entries
 
+    # list_dir itself does not adjust risk in this simple model
+    return entries
 
 def baf_http_post(url: str,
                   data: str,
                   session_id: str,
                   agent_id: str = "exam_helper_v1"):
-    """HTTP POST via BAF (monitor-only)."""
+    """HTTP POST via BAF with adaptive autonomy."""
     import requests
 
     domain_category = _categorize_domain(url)
     path_category = "other"
     nbytes = len(data.encode("utf-8", errors="ignore"))
+
+    state = _get_session_state(session_id)
+    level = state["level"]
+
+    # Enforce policy before sending
+    if level in {"L1", "L2"} and domain_category == "external_unknown":
+        narrative = "[BAF] BLOCK http_post: external domain not allowed at current level"
+        print(narrative)
+        raise PermissionError(narrative)
+
+    if level == "L0":
+        narrative = "[BAF] BLOCK http_post: HTTP calls disabled at L0, require human approval"
+        print(narrative)
+        raise PermissionError(narrative)
 
     _log_action(
         session_id=session_id,
@@ -203,6 +295,26 @@ def baf_http_post(url: str,
         path_category=path_category,
         domain_category=domain_category,
     )
+
+    # Update risk
+    delta = compute_risk_delta(
+        action_type="http_post",
+        path_category=path_category,
+        domain_category=domain_category,
+        nbytes=nbytes,
+    )
+    if delta:
+        state["risk"] += delta
+        _update_level_for_state(state)
+        narrative = _build_narrative(
+            action_type="http_post",
+            path_category=path_category,
+            domain_category=domain_category,
+            nbytes=nbytes,
+            level=state["level"],
+            risk_delta=delta,
+        )
+        print(narrative)
 
     resp = requests.post(url, data=data)
     return resp
