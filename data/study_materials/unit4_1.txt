@@ -1,0 +1,16 @@
+Unit 4: Introduction to Malware Analysis
+
+Malware Analysis is a core concept in modern cybersecurity. In this unit, we discuss the basic definition, why it matters, and how it is used in real systems.
+
+Subtopics:
+- Malware Analysis definition and core ideas
+- Common use cases of Malware Analysis
+- Challenges and limitations
+
+Short explanation:
+Malware analysis studies malicious software to understand how it works and how to defend against it.
+
+Example questions:
+1. Define Malware Analysis and explain its purpose.
+2. Give two real-world scenarios where Malware Analysis is used.
+3. What are some challenges when implementing Malware Analysis in practice?

@@ -1,0 +1,12 @@
+Unit 1: Important Questions on Firewalls
+
+This file collects some frequently asked questions for exam preparation on Firewalls.
+
+Part A – Short Answer:
+1. What is Firewalls?
+2. List any three key properties of Firewalls.
+3. Write a short note on why Firewalls is important for system security.
+
+Part B – Long Answer:
+4. Explain how Firewalls works with a simple example.
+5. Discuss the advantages and drawbacks of using Firewalls in real deployments.

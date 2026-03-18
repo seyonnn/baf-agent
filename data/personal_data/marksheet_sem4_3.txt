@@ -1,0 +1,14 @@
+--- Semester Marksheet (Mock) ---
+Name         : Kiran M
+Register No. : REG00003
+Semester     : 4
+Subjects     :
+  - CS1041  Data Structures      : 63
+  - CS1042  Operating Systems    : 89
+  - CS1043  Database Systems     : 60
+  - CS1044  Computer Networks    : 64
+  - CS1045  Elective             : 80
+
+SGPA         : 7.9
+
+Note: This is a mock marksheet generated for testing only.

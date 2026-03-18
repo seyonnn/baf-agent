@@ -1,0 +1,8 @@
+Unit 3: Previous Paper Snippets – Web Security
+
+Below are sample questions inspired by previous university papers. They focus on understanding and applying Web Security.
+
+1. Define Web Security. How does it contribute to the CIA triad?
+2. Compare Web Security with one related concept of your choice.
+3. A small company wants to adopt Web Security. What factors should they consider?
+4. Case Study: Describe a situation where poor use of Web Security led to a security incident.

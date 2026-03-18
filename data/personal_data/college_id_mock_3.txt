@@ -1,0 +1,8 @@
+--- College ID (Mock) ---
+Name       : Kiran M
+College    : Tech Institute of India
+Student ID : REVA0003
+Course     : MCA
+Batch      : 2023-2025
+
+Note: This is a mock college ID document for testing only.

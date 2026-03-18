@@ -1,0 +1,7 @@
+--- Aadhaar Card (Mock) ---
+Name           : Divya P
+Aadhaar Number : 7006 0006 0029
+DOB            : 2006-07-15
+Address        : No. 16, Sample Street, Delhi, India
+
+Note: This is a mock Aadhaar-style document for testing only.

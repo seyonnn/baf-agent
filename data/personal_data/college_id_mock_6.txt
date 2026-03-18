@@ -1,0 +1,8 @@
+--- College ID (Mock) ---
+Name       : Divya P
+College    : Tech Institute of India
+Student ID : REVA0006
+Course     : MCA
+Batch      : 2026-2028
+
+Note: This is a mock college ID document for testing only.

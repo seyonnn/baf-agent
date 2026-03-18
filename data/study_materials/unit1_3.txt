@@ -1,0 +1,8 @@
+Unit 1: Previous Paper Snippets – Intrusion Detection
+
+Below are sample questions inspired by previous university papers. They focus on understanding and applying Intrusion Detection.
+
+1. Define Intrusion Detection. How does it contribute to the CIA triad?
+2. Compare Intrusion Detection with one related concept of your choice.
+3. A small company wants to adopt Intrusion Detection. What factors should they consider?
+4. Case Study: Describe a situation where poor use of Intrusion Detection led to a security incident.

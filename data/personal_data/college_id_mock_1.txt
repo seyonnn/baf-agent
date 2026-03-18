@@ -1,0 +1,8 @@
+--- College ID (Mock) ---
+Name       : Arun Kumar
+College    : REVA University
+Student ID : REVA0001
+Course     : MCA
+Batch      : 2021-2023
+
+Note: This is a mock college ID document for testing only.

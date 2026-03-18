@@ -1,0 +1,8 @@
+Unit 4: Previous Paper Snippets – Cloud Security
+
+Below are sample questions inspired by previous university papers. They focus on understanding and applying Cloud Security.
+
+1. Define Cloud Security. How does it contribute to the CIA triad?
+2. Compare Cloud Security with one related concept of your choice.
+3. A small company wants to adopt Cloud Security. What factors should they consider?
+4. Case Study: Describe a situation where poor use of Cloud Security led to a security incident.

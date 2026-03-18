@@ -1,0 +1,14 @@
+--- Semester Marksheet (Mock) ---
+Name         : Vikram J
+Register No. : REG00007
+Semester     : 4
+Subjects     :
+  - CS1041  Data Structures      : 70
+  - CS1042  Operating Systems    : 81
+  - CS1043  Database Systems     : 82
+  - CS1044  Computer Networks    : 82
+  - CS1045  Elective             : 75
+
+SGPA         : 9.1
+
+Note: This is a mock marksheet generated for testing only.

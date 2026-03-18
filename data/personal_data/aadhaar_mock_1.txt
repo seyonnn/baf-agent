@@ -1,0 +1,7 @@
+--- Aadhaar Card (Mock) ---
+Name           : Arun Kumar
+Aadhaar Number : 7001 0001 0024
+DOB            : 2001-02-15
+Address        : No. 11, Sample Street, Chennai, India
+
+Note: This is a mock Aadhaar-style document for testing only.

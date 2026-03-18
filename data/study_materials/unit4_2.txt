@@ -1,0 +1,12 @@
+Unit 4: Important Questions on Web Security
+
+This file collects some frequently asked questions for exam preparation on Web Security.
+
+Part A – Short Answer:
+1. What is Web Security?
+2. List any three key properties of Web Security.
+3. Write a short note on why Web Security is important for system security.
+
+Part B – Long Answer:
+4. Explain how Web Security works with a simple example.
+5. Discuss the advantages and drawbacks of using Web Security in real deployments.

@@ -1,0 +1,14 @@
+--- Semester Marksheet (Mock) ---
+Name         : Priya S
+Register No. : REG00004
+Semester     : 1
+Subjects     :
+  - CS1011  Data Structures      : 78
+  - CS1012  Operating Systems    : 63
+  - CS1013  Database Systems     : 78
+  - CS1014  Computer Networks    : 93
+  - CS1015  Elective             : 60
+
+SGPA         : 8.2
+
+Note: This is a mock marksheet generated for testing only.

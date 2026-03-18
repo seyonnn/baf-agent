@@ -1,0 +1,8 @@
+--- College ID (Mock) ---
+Name       : Vikram J
+College    : REVA University
+Student ID : REVA0007
+Course     : MCA
+Batch      : 2027-2029
+
+Note: This is a mock college ID document for testing only.

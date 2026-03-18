@@ -1,0 +1,8 @@
+Unit 5: Previous Paper Snippets – IoT Security
+
+Below are sample questions inspired by previous university papers. They focus on understanding and applying IoT Security.
+
+1. Define IoT Security. How does it contribute to the CIA triad?
+2. Compare IoT Security with one related concept of your choice.
+3. A small company wants to adopt IoT Security. What factors should they consider?
+4. Case Study: Describe a situation where poor use of IoT Security led to a security incident.

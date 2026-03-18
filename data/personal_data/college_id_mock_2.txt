@@ -1,0 +1,8 @@
+--- College ID (Mock) ---
+Name       : Sneha R
+College    : Sample Engineering College
+Student ID : REVA0002
+Course     : MCA
+Batch      : 2022-2024
+
+Note: This is a mock college ID document for testing only.

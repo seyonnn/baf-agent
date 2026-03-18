@@ -1,0 +1,14 @@
+--- Semester Marksheet (Mock) ---
+Name         : Arun Kumar
+Register No. : REG00001
+Semester     : 2
+Subjects     :
+  - CS1021  Data Structures      : 71
+  - CS1022  Operating Systems    : 95
+  - CS1023  Database Systems     : 79
+  - CS1024  Computer Networks    : 79
+  - CS1025  Elective             : 63
+
+SGPA         : 7.3
+
+Note: This is a mock marksheet generated for testing only.

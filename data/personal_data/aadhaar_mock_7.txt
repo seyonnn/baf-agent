@@ -1,0 +1,7 @@
+--- Aadhaar Card (Mock) ---
+Name           : Vikram J
+Aadhaar Number : 7007 0007 0030
+DOB            : 2007-08-15
+Address        : No. 17, Sample Street, Chennai, India
+
+Note: This is a mock Aadhaar-style document for testing only.

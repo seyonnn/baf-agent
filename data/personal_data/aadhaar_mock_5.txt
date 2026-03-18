@@ -1,0 +1,7 @@
+--- Aadhaar Card (Mock) ---
+Name           : Rahul N
+Aadhaar Number : 7005 0005 0028
+DOB            : 2005-06-15
+Address        : No. 15, Sample Street, Mumbai, India
+
+Note: This is a mock Aadhaar-style document for testing only.

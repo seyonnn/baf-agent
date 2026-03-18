@@ -1,0 +1,14 @@
+--- Semester Marksheet (Mock) ---
+Name         : Divya P
+Register No. : REG00006
+Semester     : 3
+Subjects     :
+  - CS1031  Data Structures      : 61
+  - CS1032  Operating Systems    : 67
+  - CS1033  Database Systems     : 69
+  - CS1034  Computer Networks    : 63
+  - CS1035  Elective             : 65
+
+SGPA         : 8.8
+
+Note: This is a mock marksheet generated for testing only.

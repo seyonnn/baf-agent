@@ -1,0 +1,16 @@
+Unit 1: Introduction to Access Control
+
+Access Control is a core concept in modern cybersecurity. In this unit, we discuss the basic definition, why it matters, and how it is used in real systems.
+
+Subtopics:
+- Access Control definition and core ideas
+- Common use cases of Access Control
+- Challenges and limitations
+
+Short explanation:
+Access control decides who is allowed to use which resource, and under what conditions.
+
+Example questions:
+1. Define Access Control and explain its purpose.
+2. Give two real-world scenarios where Access Control is used.
+3. What are some challenges when implementing Access Control in practice?

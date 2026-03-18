@@ -1,0 +1,8 @@
+Unit 2: Previous Paper Snippets – Malware Analysis
+
+Below are sample questions inspired by previous university papers. They focus on understanding and applying Malware Analysis.
+
+1. Define Malware Analysis. How does it contribute to the CIA triad?
+2. Compare Malware Analysis with one related concept of your choice.
+3. A small company wants to adopt Malware Analysis. What factors should they consider?
+4. Case Study: Describe a situation where poor use of Malware Analysis led to a security incident.

@@ -1,0 +1,7 @@
+--- Aadhaar Card (Mock) ---
+Name           : Priya S
+Aadhaar Number : 7004 0004 0027
+DOB            : 2004-05-15
+Address        : No. 14, Sample Street, Pune, India
+
+Note: This is a mock Aadhaar-style document for testing only.

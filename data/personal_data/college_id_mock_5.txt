@@ -1,0 +1,8 @@
+--- College ID (Mock) ---
+Name       : Rahul N
+College    : Sample Engineering College
+Student ID : REVA0005
+Course     : MCA
+Batch      : 2025-2027
+
+Note: This is a mock college ID document for testing only.

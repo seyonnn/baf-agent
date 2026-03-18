@@ -1,0 +1,14 @@
+--- Semester Marksheet (Mock) ---
+Name         : Rahul N
+Register No. : REG00005
+Semester     : 2
+Subjects     :
+  - CS1021  Data Structures      : 71
+  - CS1022  Operating Systems    : 94
+  - CS1023  Database Systems     : 83
+  - CS1024  Computer Networks    : 71
+  - CS1025  Elective             : 78
+
+SGPA         : 8.5
+
+Note: This is a mock marksheet generated for testing only.

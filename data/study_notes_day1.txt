@@ -1,0 +1,104 @@
+=== unit1_1.txt ===
+Unit 1: Introduction to Access Control
+
+Access Control is a core concept in modern cybersecurity. In this unit, we discuss the basic definition, why it matters, and how it is used in real systems.
+
+Subtopics:
+
+=== unit1_2.txt ===
+Unit 1: Important Questions on Firewalls
+
+This file collects some frequently asked questions for exam preparation on Firewalls.
+
+Part A – Short Answer:
+
+=== unit1_3.txt ===
+Unit 1: Previous Paper Snippets – Intrusion Detection
+
+Below are sample questions inspired by previous university papers. They focus on understanding and applying Intrusion Detection.
+
+1. Define Intrusion Detection. How does it contribute to the CIA triad?
+
+=== unit2_1.txt ===
+Unit 2: Introduction to Firewalls
+
+Firewalls is a core concept in modern cybersecurity. In this unit, we discuss the basic definition, why it matters, and how it is used in real systems.
+
+Subtopics:
+
+=== unit2_2.txt ===
+Unit 2: Important Questions on Intrusion Detection
+
+This file collects some frequently asked questions for exam preparation on Intrusion Detection.
+
+Part A – Short Answer:
+
+=== unit2_3.txt ===
+Unit 2: Previous Paper Snippets – Malware Analysis
+
+Below are sample questions inspired by previous university papers. They focus on understanding and applying Malware Analysis.
+
+1. Define Malware Analysis. How does it contribute to the CIA triad?
+
+=== unit3_1.txt ===
+Unit 3: Introduction to Intrusion Detection
+
+Intrusion Detection is a core concept in modern cybersecurity. In this unit, we discuss the basic definition, why it matters, and how it is used in real systems.
+
+Subtopics:
+
+=== unit3_2.txt ===
+Unit 3: Important Questions on Malware Analysis
+
+This file collects some frequently asked questions for exam preparation on Malware Analysis.
+
+Part A – Short Answer:
+
+=== unit3_3.txt ===
+Unit 3: Previous Paper Snippets – Web Security
+
+Below are sample questions inspired by previous university papers. They focus on understanding and applying Web Security.
+
+1. Define Web Security. How does it contribute to the CIA triad?
+
+=== unit4_1.txt ===
+Unit 4: Introduction to Malware Analysis
+
+Malware Analysis is a core concept in modern cybersecurity. In this unit, we discuss the basic definition, why it matters, and how it is used in real systems.
+
+Subtopics:
+
+=== unit4_2.txt ===
+Unit 4: Important Questions on Web Security
+
+This file collects some frequently asked questions for exam preparation on Web Security.
+
+Part A – Short Answer:
+
+=== unit4_3.txt ===
+Unit 4: Previous Paper Snippets – Cloud Security
+
+Below are sample questions inspired by previous university papers. They focus on understanding and applying Cloud Security.
+
+1. Define Cloud Security. How does it contribute to the CIA triad?
+
+=== unit5_1.txt ===
+Unit 5: Introduction to Web Security
+
+Web Security is a core concept in modern cybersecurity. In this unit, we discuss the basic definition, why it matters, and how it is used in real systems.
+
+Subtopics:
+
+=== unit5_2.txt ===
+Unit 5: Important Questions on Cloud Security
+
+This file collects some frequently asked questions for exam preparation on Cloud Security.
+
+Part A – Short Answer:
+
+=== unit5_3.txt ===
+Unit 5: Previous Paper Snippets – IoT Security
+
+Below are sample questions inspired by previous university papers. They focus on understanding and applying IoT Security.
+
+1. Define IoT Security. How does it contribute to the CIA triad?

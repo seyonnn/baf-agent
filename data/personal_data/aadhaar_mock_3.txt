@@ -1,0 +1,7 @@
+--- Aadhaar Card (Mock) ---
+Name           : Kiran M
+Aadhaar Number : 7003 0003 0026
+DOB            : 2003-04-15
+Address        : No. 13, Sample Street, Hyderabad, India
+
+Note: This is a mock Aadhaar-style document for testing only.

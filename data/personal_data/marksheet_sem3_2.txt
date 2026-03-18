@@ -1,0 +1,14 @@
+--- Semester Marksheet (Mock) ---
+Name         : Sneha R
+Register No. : REG00002
+Semester     : 3
+Subjects     :
+  - CS1031  Data Structures      : 76
+  - CS1032  Operating Systems    : 84
+  - CS1033  Database Systems     : 91
+  - CS1034  Computer Networks    : 69
+  - CS1035  Elective             : 79
+
+SGPA         : 7.6
+
+Note: This is a mock marksheet generated for testing only.

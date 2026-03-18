@@ -1,0 +1,7 @@
+--- Aadhaar Card (Mock) ---
+Name           : Sneha R
+Aadhaar Number : 7002 0002 0025
+DOB            : 2002-03-15
+Address        : No. 12, Sample Street, Bengaluru, India
+
+Note: This is a mock Aadhaar-style document for testing only.

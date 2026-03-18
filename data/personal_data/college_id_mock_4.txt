@@ -1,0 +1,8 @@
+--- College ID (Mock) ---
+Name       : Priya S
+College    : REVA University
+Student ID : REVA0004
+Course     : MCA
+Batch      : 2024-2026
+
+Note: This is a mock college ID document for testing only.
