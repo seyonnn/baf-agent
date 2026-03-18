@@ -1,0 +1,151 @@
+### Quick notes for: Unit 1 quick notes
+
+=== unit1_1.txt ===
+Unit 1: Introduction to Access Control
+
+Access Control is a core concept in modern cybersecurity. In this unit, we discuss the basic definition, why it matters, and how it is used in real systems.
+
+Subtopics:
+- Access Control definition and core ideas
+- Common use cases of Access Control
+- Challenges and limitations
+
+=== unit1_2.txt ===
+Unit 1: Important Questions on Firewalls
+
+This file collects some frequently asked questions for exam preparation on Firewalls.
+
+Part A – Short Answer:
+1. What is Firewalls?
+2. List any three key properties of Firewalls.
+3. Write a short note on why Firewalls is important for system security.
+
+=== unit1_3.txt ===
+Unit 1: Previous Paper Snippets – Intrusion Detection
+
+Below are sample questions inspired by previous university papers. They focus on understanding and applying Intrusion Detection.
+
+1. Define Intrusion Detection. How does it contribute to the CIA triad?
+2. Compare Intrusion Detection with one related concept of your choice.
+3. A small company wants to adopt Intrusion Detection. What factors should they consider?
+4. Case Study: Describe a situation where poor use of Intrusion Detection led to a security incident.
+
+=== unit2_1.txt ===
+Unit 2: Introduction to Firewalls
+
+Firewalls is a core concept in modern cybersecurity. In this unit, we discuss the basic definition, why it matters, and how it is used in real systems.
+
+Subtopics:
+- Firewalls definition and core ideas
+- Common use cases of Firewalls
+- Challenges and limitations
+
+=== unit2_2.txt ===
+Unit 2: Important Questions on Intrusion Detection
+
+This file collects some frequently asked questions for exam preparation on Intrusion Detection.
+
+Part A – Short Answer:
+1. What is Intrusion Detection?
+2. List any three key properties of Intrusion Detection.
+3. Write a short note on why Intrusion Detection is important for system security.
+
+=== unit2_3.txt ===
+Unit 2: Previous Paper Snippets – Malware Analysis
+
+Below are sample questions inspired by previous university papers. They focus on understanding and applying Malware Analysis.
+
+1. Define Malware Analysis. How does it contribute to the CIA triad?
+2. Compare Malware Analysis with one related concept of your choice.
+3. A small company wants to adopt Malware Analysis. What factors should they consider?
+4. Case Study: Describe a situation where poor use of Malware Analysis led to a security incident.
+
+=== unit3_1.txt ===
+Unit 3: Introduction to Intrusion Detection
+
+Intrusion Detection is a core concept in modern cybersecurity. In this unit, we discuss the basic definition, why it matters, and how it is used in real systems.
+
+Subtopics:
+- Intrusion Detection definition and core ideas
+- Common use cases of Intrusion Detection
+- Challenges and limitations
+
+=== unit3_2.txt ===
+Unit 3: Important Questions on Malware Analysis
+
+This file collects some frequently asked questions for exam preparation on Malware Analysis.
+
+Part A – Short Answer:
+1. What is Malware Analysis?
+2. List any three key properties of Malware Analysis.
+3. Write a short note on why Malware Analysis is important for system security.
+
+=== unit3_3.txt ===
+Unit 3: Previous Paper Snippets – Web Security
+
+Below are sample questions inspired by previous university papers. They focus on understanding and applying Web Security.
+
+1. Define Web Security. How does it contribute to the CIA triad?
+2. Compare Web Security with one related concept of your choice.
+3. A small company wants to adopt Web Security. What factors should they consider?
+4. Case Study: Describe a situation where poor use of Web Security led to a security incident.
+
+=== unit4_1.txt ===
+Unit 4: Introduction to Malware Analysis
+
+Malware Analysis is a core concept in modern cybersecurity. In this unit, we discuss the basic definition, why it matters, and how it is used in real systems.
+
+Subtopics:
+- Malware Analysis definition and core ideas
+- Common use cases of Malware Analysis
+- Challenges and limitations
+
+=== unit4_2.txt ===
+Unit 4: Important Questions on Web Security
+
+This file collects some frequently asked questions for exam preparation on Web Security.
+
+Part A – Short Answer:
+1. What is Web Security?
+2. List any three key properties of Web Security.
+3. Write a short note on why Web Security is important for system security.
+
+=== unit4_3.txt ===
+Unit 4: Previous Paper Snippets – Cloud Security
+
+Below are sample questions inspired by previous university papers. They focus on understanding and applying Cloud Security.
+
+1. Define Cloud Security. How does it contribute to the CIA triad?
+2. Compare Cloud Security with one related concept of your choice.
+3. A small company wants to adopt Cloud Security. What factors should they consider?
+4. Case Study: Describe a situation where poor use of Cloud Security led to a security incident.
+
+=== unit5_1.txt ===
+Unit 5: Introduction to Web Security
+
+Web Security is a core concept in modern cybersecurity. In this unit, we discuss the basic definition, why it matters, and how it is used in real systems.
+
+Subtopics:
+- Web Security definition and core ideas
+- Common use cases of Web Security
+- Challenges and limitations
+
+=== unit5_2.txt ===
+Unit 5: Important Questions on Cloud Security
+
+This file collects some frequently asked questions for exam preparation on Cloud Security.
+
+Part A – Short Answer:
+1. What is Cloud Security?
+2. List any three key properties of Cloud Security.
+3. Write a short note on why Cloud Security is important for system security.
+
+=== unit5_3.txt ===
+Unit 5: Previous Paper Snippets – IoT Security
+
+Below are sample questions inspired by previous university papers. They focus on understanding and applying IoT Security.
+
+1. Define IoT Security. How does it contribute to the CIA triad?
+2. Compare IoT Security with one related concept of your choice.
+3. A small company wants to adopt IoT Security. What factors should they consider?
+4. Case Study: Describe a situation where poor use of IoT Security led to a security incident.
