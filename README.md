@@ -1,6 +1,6 @@
-# BAF-Agent: Open Behavioral Firewall for AI Agents
+# BAF-Agent: Open behavioural Firewall for AI Agents
 
-BAF-Agent is an **open, behavior-based firewall layer for AI agents**. It sits between an agent and its environment (files, network) and **learns what “normal” looks like**, then **flags and constrains abnormal behavior** that could lead to data exfiltration or misuse.
+BAF-Agent is an **open, behaviour-based firewall layer for AI agents**. It sits between an agent and its environment (files, network) and **learns what “normal” looks like**, then **flags and constrains abnormal behaviour** that could lead to data exfiltration or misuse.
 
 We demonstrate BAF-Agent on a realistic **exam-helper agent** (a study assistant that reads unit notes and past papers), but the design is **agent-agnostic** and intended for any agent that can read files or call APIs.
 
@@ -17,10 +17,10 @@ AI agents are increasingly able to:
 This creates a new security gap:
 
 - Agents can **leak personal and sensitive documents** (IDs, marksheets, HR records, legal documents)  
-- Prompt-injected content inside files, emails, or web pages can **hijack agent behavior**  
+- Prompt-injected content inside files, emails, or web pages can **hijack agent behaviour**  
 - Traditional guardrails focus on text safety, not on how an agent **behaves at the system boundary**
 
-BAF-Agent treats agents as **non-human identities** and introduces a lightweight **behavioral firewall** that watches and governs their actions.
+BAF-Agent treats agents as **non-human identities** and introduces a lightweight **behavioural firewall** that watches and governs their actions.
 
 ---
 
@@ -34,8 +34,8 @@ BAF-Agent wraps the sensitive operations of an AI agent:
 For each operation, BAF-Agent:
 
 1. **Logs** a structured action event (timestamp, session, action type, resource, bytes, categories).  
-2. **Builds a behavior fingerprint** from benign sessions (what paths, how many files, which endpoints).  
-3. **Computes a risk view** when behavior deviates (new folders, personal docs, unknown domains, unusual volume).  
+2. **Builds a behaviour fingerprint** from benign sessions (what paths, how many files, which endpoints).  
+3. **Computes a risk view** when behaviour deviates (new folders, personal docs, unknown domains, unusual volume).  
 4. **Adjusts autonomy levels** (L2 → L1 → L0) to allow, restrict, or block actions when risk increases.
 
 The long-term goal is a **vendor-neutral, open firewall** that developers can place in front of their agents, independent of specific hardware or cloud stacks.
@@ -52,7 +52,7 @@ Located under `src/agent/`.
 
 - Models an AI exam-helper that reads unit notes, previous papers, and important questions from `data/Study_Materials/`.  
 - Generates quick revision notes by aggregating and summarizing these files.  
-- Serves as the **primary case study** for demonstrating agent behavior and exfiltration risk.
+- Serves as the **primary case study** for demonstrating agent behaviour and exfiltration risk.
 
 ### 2. Attacker Exfiltration Server
 
@@ -84,7 +84,7 @@ Located under `src/baf/`.
   The firewall logic is not tied to a specific agent; the exam helper is just one reference implementation.
 
 - **Minimal but expressive event schema:**  
-  Events capture enough context (session, resource type, size, categories) to support behavior fingerprinting and future ML-based anomaly detection.
+  Events capture enough context (session, resource type, size, categories) to support behaviour fingerprinting and future ML-based anomaly detection.
 
 - **Risk-aware autonomy control (planned):**  
   Subsequent versions will compute risk from features such as:
@@ -137,7 +137,7 @@ The intent is to make BAF-Agent a reusable building block for securing **agents-
   - Monitor-only BAF-Agent v0 logging all sensitive actions.
 
 - **Planned next steps**
-  - Behavior fingerprinting from benign sessions.  
+  - behaviour fingerprinting from benign sessions.  
   - Risk scoring based on path/domain/volume signals.  
   - Adaptive autonomy control (L2/L1/L0) with allow/restrict/block decisions.  
   - Additional agents and richer policy examples beyond the exam-helper scenario.
@@ -146,7 +146,7 @@ The intent is to make BAF-Agent a reusable building block for securing **agents-
 
 ## Vision
 
-BAF-Agent aims to be a **vendor-neutral, open behavioral firewall** for AI agents.
+BAF-Agent aims to be a **vendor-neutral, open behavioural firewall** for AI agents.
 
 As agents become a core part of everyday software (agents-as-a-service), users and developers need a way to:
 
