@@ -27,4 +27,6 @@ We treat the AI exam helper as an "AI worker" and put a behavioral firewall in f
 
 ## Status
 
-- [ ] Day 1: Project structure + skeleton exam helper agent
+✅ Day 1: Project structure + dummy data + skeleton exam helper agent
+✅ Day 2: Flask exfil server + query-based exam helper (notes generator), no firewall yet
+⏳ Day 3+: BAF-Agent logging, behavior fingerprinting, and adaptive autonomy control
