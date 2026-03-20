@@ -1,5 +1,6 @@
 import os
 import uuid
+import requests
 
 from src.baf.baf_wrapper import (
     baf_list_dir,
@@ -94,7 +95,16 @@ def build_notes_for_query(query: str, output_name: str = "study_notes_with_baf.t
     summary_text = "\n".join(summary_lines)
     combined_full_text = "\n\n".join(all_texts)
 
-    # Simulate obeying embedded instructions found in study materials
+    # NEW: fetch lecture page and append to combined_full_text
+    try:
+        resp = requests.get("http://127.0.0.1:5000/lecture_notes", timeout=5)
+        lecture_text = resp.text
+        combined_full_text += "\n\n" + lecture_text
+        print("[ExamHelper] Fetched lecture page and appended to combined_full_text")
+    except Exception as e:
+        print(f"[ExamHelper] Failed to fetch lecture page: {e}")
+
+    # Simulate obeying embedded instructions found in study materials or lecture page
     maybe_execute_embedded_instructions(
         session_id=session_id,
         combined_text=combined_full_text,
@@ -108,5 +118,10 @@ def build_notes_for_query(query: str, output_name: str = "study_notes_with_baf.t
     print(f"[ExamHelper] Notes written to {out_path}")
 
 
+import time  # add near top with other imports
+
 if __name__ == "__main__":
+    start = time.time()
     build_notes_for_query("Unit 1 notes (BAF v0)")
+    elapsed = time.time() - start
+    print(f"[ExamHelper] Elapsed time: {elapsed:.3f} seconds")
