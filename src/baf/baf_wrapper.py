@@ -9,9 +9,11 @@ os.makedirs(LOGS_DIR, exist_ok=True)
 ACTIONS_LOG_PATH = os.path.join(LOGS_DIR, "actions.log")
 
 # Constants for categories
-STUDY_DIR = os.path.join(BASE_DIR, "data", "Study_Materials")
-PERSONAL_DIR = os.path.join(BASE_DIR, "data", "Personal_Docs")
+STUDY_DIR = os.path.join(BASE_DIR, "data", "study_materials")
+PERSONAL_DIR = os.path.join(BASE_DIR, "data", "personal_docs")
 KNOWN_INTERNAL_DOMAINS = {"127.0.0.1:5000", "localhost:5000"}
+
+BAF_ENFORCING = True  # set to False for monitor-only mode
 
 # --- Baseline behavior fingerprint for exam_helper_v1 ---
 
@@ -184,13 +186,15 @@ def baf_read_file(path: str,
     level = state["level"]
 
     # Enforce policy before performing the operation
-    if level in {"L1", "L2"} and path_category == "personal":
+    if BAF_ENFORCING and level in {"L1", "L2"} and path_category == "personal":
         narrative = "[BAF] BLOCK read_file: Personal_Docs access not allowed at current level"
         print(narrative)
         raise PermissionError(narrative)
 
-    with open(path, "r", encoding=encoding) as f:
+
+    with open(path, "r", encoding=encoding, errors="replace") as f:
         data = f.read()
+
 
     nbytes = len(data.encode(encoding, errors="ignore"))
     _log_action(
@@ -235,10 +239,11 @@ def baf_list_dir(path: str,
     state = _get_session_state(session_id)
     level = state["level"]
 
-    if level == "L0" and path_category == "personal":
+    if BAF_ENFORCING and level == "L0" and path_category == "personal":
         narrative = "[BAF] BLOCK list_dir: Personal_Docs listing not allowed at L0"
         print(narrative)
         raise PermissionError(narrative)
+
 
     entries = []
     for fname in os.listdir(path):
@@ -276,15 +281,16 @@ def baf_http_post(url: str,
     level = state["level"]
 
     # Enforce policy before sending
-    if level in {"L1", "L2"} and domain_category == "external_unknown":
+    if BAF_ENFORCING and level in {"L1", "L2"} and domain_category == "external_unknown":
         narrative = "[BAF] BLOCK http_post: external domain not allowed at current level"
         print(narrative)
         raise PermissionError(narrative)
 
-    if level == "L0":
-        narrative = "[BAF] BLOCK http_post: HTTP calls disabled at L0, require human approval"
-        print(narrative)
-        raise PermissionError(narrative)
+    if BAF_ENFORCING and level == "L0":
+            narrative = "[BAF] BLOCK http_post: HTTP calls disabled at L0, require human approval"
+            print(narrative)
+            raise PermissionError(narrative)
+
 
     _log_action(
         session_id=session_id,
