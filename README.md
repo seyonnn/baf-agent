@@ -152,6 +152,19 @@ The intent is to make BAF-Agent a reusable building block for securing **agents-
 
 ---
 
+## Experiments: Prompt Injection & Exfiltration
+
+We run a controlled prompt-injection attack against the exam-helper agent using a malicious study file that instructs the agent to read `Personal_Docs/` and POST them to `/exfil`.
+
+| Scenario                    | BAF enforcing | Personal files read | Bytes leaked to /exfil |
+|-----------------------------|--------------|---------------------|------------------------|
+| A – No BAF enforcement      | No           | 22                  | 6355                   |
+| B – With BAF enforcement    | Yes          | 0                   | 0                      |
+
+In monitor-only mode, the agent reads 22 synthetic personal documents and exfiltrates 6355 bytes to the attacker endpoint. With BAF enforcement enabled, accesses to `Personal_Docs/` and the exfil HTTP POST are blocked, and no data is leaked.
+
+---
+
 ## Vision
 
 BAF-Agent aims to be a **vendor-neutral, open behavioural firewall** for AI agents.
