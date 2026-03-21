@@ -273,3 +273,5 @@
     - Run 2: ~0.018 s.
     - Run 3: ~0.011 s.
   - Interpretation: on this small case study, BAF-Agent adds only a few tens of milliseconds per study session, which is effectively negligible overhead for interactive use.
+
+V2 Day V1–V2 done: baf_core package, config model, profiles, example harness.
