@@ -1,0 +1,28 @@
+paths:
+  study: "/app/data/Study_Materials"
+  personal: "/app/data/Personal_Docs"
+  secrets:
+    - "~/.ssh"
+    - "./.env"
+
+domains:
+  internal_trusted:
+    - "127.0.0.1:5000"
+  external_blocked: []
+
+risk_rules:
+  personal_read: 50
+  secrets_read: 80
+  external_unknown_http: 40
+  http_post_large_bytes: 20
+  http_post_large_threshold: 10240
+
+thresholds:
+  L2_to_L1: 40
+  L1_to_L0: 80
+
+profiles:
+  dev_laptop:
+    use_paths: ["secrets"]
+  small_enterprise:
+    use_paths: ["personal"]
