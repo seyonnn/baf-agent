@@ -1,6 +1,6 @@
 paths:
-  study: "/app/data/Study_Materials"
-  personal: "/app/data/Personal_Docs"
+  study: "/Users/poovaragamukeshkumar/Documents/GitHub/baf-agent/examples/exam_helper_v1/data/study_materials"
+  personal: "/Users/poovaragamukeshkumar/Documents/GitHub/baf-agent/examples/exam_helper_v1/data/personal_docs"
   secrets:
     - "~/.ssh"
     - "./.env"
@@ -21,6 +21,8 @@ thresholds:
   L2_to_L1: 40             # >=40 → L1
   L1_to_L0: 80             # >=80 → L0
 
+
 profiles:
   dev_laptop:
-    use_paths: ["secrets", "personal"]
+    use_paths: ["personal", "secrets"]
+
