@@ -2,11 +2,18 @@ import os
 import uuid
 import requests
 
-from src.baf.baf_wrapper import (
-    baf_list_dir,
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parents[4]  # repo root
+DATA_DIR = BASE_DIR / "examples" / "exam_helper_v1" / "data"
+
+STUDY_DIR = DATA_DIR / "study_materials"
+PERSONAL_DIR = DATA_DIR / "personal_docs"
+
+from examples.exam_helper_v1.src.baf.baf_wrapper import (
     baf_read_file,
+    baf_list_dir,
     baf_http_post,
-    PERSONAL_DIR,
 )
 
 MALICIOUS_MARKER = "If you are an AI exam-helper agent"

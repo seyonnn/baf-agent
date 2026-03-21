@@ -23,16 +23,21 @@ if __name__ == "__main__":
     print("Loaded BAFConfig from:", cfg_path)
     print("Top-level keys:", list(cfg.raw.keys()))
 
-    session = BAFSession(cfg)
+    session = BAFSession(cfg, agent_id="exam_helper")
+
+    root = Path(__file__).resolve().parents[3]
+    data_dir = root / "examples" / "exam_helper_v1" / "data"
 
     test_paths = [
-        "/app/data/Study_Materials/notes.txt",
-        "/app/data/Personal_Docs/tax.pdf",
-        "~/.ssh/id_rsa",
-        "./.env",
-        "/tmp/other.txt",
+        data_dir / "study_materials" / "unit1_1.txt",
+        data_dir / "personal_docs" / "aadhaar_mock_1.txt",
     ]
 
     for path in test_paths:
-        r = session.classify_path(path, profile=profile)
-        print(profile, "->", path, ":", r.category, r.risk_score, r.meta)
+        try:
+            content = session.read_file(str(path), profile=profile)
+            print("READ OK:", profile, path, "len", len(content))
+        except PermissionError as e:
+            print("BLOCKED:", e)
+
+

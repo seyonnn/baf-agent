@@ -1,8 +1,11 @@
+import csv
 from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from .config import BAFConfig
+from .policies import BAFPolicyState, compute_risk_delta, update_level
 
 
 @dataclass
@@ -15,15 +18,74 @@ class BAFClassificationResult:
 
 
 class BAFSession:
-    def __init__(self, config: BAFConfig):
+    def __init__(self, config: BAFConfig, agent_id: str = "exam_helper", session_id: Optional[str] = None):
         self.config = config
         raw = config.raw
+
+        self.agent_id = agent_id
+        self.session_id = session_id or datetime.utcnow().strftime("%Y%m%d%H%M%S")
 
         self.paths: Dict[str, Any] = raw.get("paths", {})
         self.domains: Dict[str, Any] = raw.get("domains", {})
         self.risk_rules: Dict[str, Any] = raw.get("risk_rules", {})
         self.thresholds: Dict[str, Any] = raw.get("thresholds", {})
         self.profiles: Dict[str, Any] = raw.get("profiles", {})
+
+        # Per-session risk/level state
+        self.state = BAFPolicyState()
+
+        # Simple CSV log sink
+        logs_root = Path("logs")
+        logs_root.mkdir(exist_ok=True)
+        self.log_path = logs_root / f"baf_session_{self.session_id}.csv"
+        if not self.log_path.exists():
+            with self.log_path.open("w", newline="", encoding="utf-8") as f:
+                writer = csv.writer(f)
+                writer.writerow(
+                    [
+                        "timestamp",
+                        "session_id",
+                        "agent_id",
+                        "action",
+                        "resource",
+                        "profile",
+                        "matched_group",
+                        "base_rule",
+                        "score_delta",
+                        "risk_score",
+                        "level",
+                        "decision",
+                    ]
+                )
+
+    def _log_event(
+        self,
+        action: str,
+        resource: str,
+        profile: Optional[str],
+        matched_group: Optional[str],
+        base_rule: Optional[str],
+        score_delta: int,
+        decision: str,
+    ) -> None:
+        with self.log_path.open("a", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f)
+            writer.writerow(
+                [
+                    datetime.utcnow().isoformat(),
+                    self.session_id,
+                    self.agent_id,
+                    action,
+                    resource,
+                    profile or "",
+                    matched_group or "",
+                    base_rule or "",
+                    score_delta,
+                    self.state.risk_score,
+                    self.state.level,
+                    decision,
+                ]
+            )
 
     def _profile_use_paths(self, profile: Optional[str]) -> List[str]:
         if not profile:
@@ -64,7 +126,6 @@ class BAFSession:
         # Normalize configured paths to absolute for comparison
         for group_name, cfg in self.paths.items():
             # cfg can be a string or a list
-            dirs: List[str]
             if isinstance(cfg, str):
                 dirs = [cfg]
             else:
@@ -113,7 +174,7 @@ class BAFSession:
         )
 
     def classify_domain(self, domain: str, profile: Optional[str] = None) -> BAFClassificationResult:
-        # To be implemented later using `domains` and `risk_rules.external_unknown_http`, etc.
+        # To be extended later if you want a BAFClassificationResult for domains
         return BAFClassificationResult(
             kind="domain",
             value=domain,
@@ -121,3 +182,144 @@ class BAFSession:
             risk_score=0.0,
             meta={"profile": profile},
         )
+
+    # === Helpers for Day V3 ===
+
+    def _categorize_domain(self, url: str) -> str:
+        """Return domain category: internal_known or external_unknown."""
+        from urllib.parse import urlparse
+
+        try:
+            parsed = urlparse(url)
+            host = parsed.netloc
+            if not host:
+                return "none"
+            internal = set(self.domains.get("internal_trusted", []))
+            if host in internal:
+                return "internal_known"
+            return "external_unknown"
+        except Exception:
+            return "none"
+
+    # === New Day V3 wrappers ===
+
+    def list_dir(self, path: str, profile: Optional[str] = None) -> List[str]:
+        result = self.classify_path(path, profile=profile)
+
+        # Map group to action
+        if result.meta.get("matched_group") == "secrets":
+            action_key = "read_secrets"
+        elif result.meta.get("matched_group") == "personal":
+            action_key = "read_personal"
+        else:
+            action_key = "read_other"
+
+        score_delta = compute_risk_delta(action_key, {"risk_rules": self.risk_rules})
+        self.state.risk_score = min(100, self.state.risk_score + score_delta)
+        update_level(self.state, self.thresholds)
+
+        decision = "allow"
+        if self.state.level == "L0" and result.meta.get("matched_group") in ("secrets", "personal"):
+            decision = "block"
+
+        self._log_event(
+            action="list_dir",
+            resource=path,
+            profile=profile,
+            matched_group=result.meta.get("matched_group"),
+            base_rule=result.meta.get("base_rule"),
+            score_delta=score_delta,
+            decision=decision,
+        )
+
+        if decision == "block":
+            raise PermissionError(f"BAF blocked list_dir on {path} at level {self.state.level}")
+
+        p = Path(path).expanduser()
+        return [str(child) for child in p.iterdir()]
+
+    def read_file(self, path: str, profile: Optional[str] = None) -> str:
+        result = self.classify_path(path, profile=profile)
+
+        if result.meta.get("matched_group") == "secrets":
+            action_key = "read_secrets"
+        elif result.meta.get("matched_group") == "personal":
+            action_key = "read_personal"
+        else:
+            action_key = "read_other"
+
+
+        score_delta = compute_risk_delta(action_key, {"risk_rules": self.risk_rules})
+        self.state.risk_score = min(100, self.state.risk_score + score_delta)
+        update_level(self.state, self.thresholds)
+
+        decision = "allow"
+        if self.state.level == "L0" and result.meta.get("matched_group") in ("secrets", "personal"):
+            decision = "block"
+
+        self._log_event(
+            action="read_file",
+            resource=path,
+            profile=profile,
+            matched_group=result.meta.get("matched_group"),
+            base_rule=result.meta.get("base_rule"),
+            score_delta=score_delta,
+            decision=decision,
+        )
+
+        if decision == "block":
+            raise PermissionError(f"BAF blocked read_file on {path} at level {self.state.level}")
+
+        p = Path(path).expanduser()
+        return p.read_text(encoding="utf-8", errors="ignore")
+
+    def http_post(self, url: str, data: str, profile: Optional[str] = None):
+        """
+        HTTP POST with BAF enforcement and logging.
+        """
+        import requests
+
+        domain_category = self._categorize_domain(url)
+        nbytes = len(data.encode("utf-8", errors="ignore"))
+
+        # Determine logical action keys for risk
+        action_keys: List[str] = []
+        if domain_category == "external_unknown":
+            action_keys.append("external_http")
+
+        threshold = int(self.risk_rules.get("http_post_large_threshold", 10240))
+        if nbytes > threshold:
+            action_keys.append("large_http_post")
+
+        # Compute combined risk delta
+        score_delta = 0
+        for key in action_keys:
+            score_delta += compute_risk_delta(key, {"risk_rules": self.risk_rules})
+
+        if score_delta:
+            self.state.risk_score = min(100, self.state.risk_score + score_delta)
+            update_level(self.state, self.thresholds)
+
+        # Enforcement rules (similar spirit to v1)
+        decision = "allow"
+        if self.state.level in {"L1", "L2"} and domain_category == "external_unknown":
+            decision = "block"
+        if self.state.level == "L0":
+            decision = "block"
+
+        self._log_event(
+            action="http_post",
+            resource=url,
+            profile=profile,
+            matched_group=None,
+            base_rule=",".join(action_keys) if action_keys else "",
+            score_delta=score_delta,
+            decision=decision,
+        )
+
+        if decision == "block":
+            raise PermissionError(f"BAF blocked http_post to {url} at level {self.state.level}")
+
+        resp = requests.post(url, data=data)
+        return resp
+        
