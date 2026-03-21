@@ -1,3 +1,0 @@
-scenario,enforcing,personal_files_read,bytes_to_exfil
-A - No BAF Enforcement,false,22,6355
-B - With BAF Enforcement,true,0,0
