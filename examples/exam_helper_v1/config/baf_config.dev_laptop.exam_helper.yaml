@@ -21,8 +21,13 @@ thresholds:
   L2_to_L1: 40             # >=40 → L1
   L1_to_L0: 80             # >=80 → L0
 
-
 profiles:
   dev_laptop:
     use_paths: ["personal", "secrets"]
 
+tools:
+  file_read:
+    default_mode: "raw"        # raw | metadata | redacted | summary
+    profiles:
+      dev_laptop: "raw"
+      small_enterprise: "redacted"

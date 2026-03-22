@@ -18,14 +18,27 @@ def main():
         profile=profile,
     )
 
-    print("Read one personal file (should increase risk and maybe change level)")
+    print("Read one personal file (raw, should increase risk and maybe change level)")
     try:
-        session.read_file(
+        raw_result = session.safe_read_file(
             "/Users/poovaragamukeshkumar/Documents/GitHub/baf-agent/examples/exam_helper_v1/data/personal_docs/college_id_mock_1.txt",
             profile=profile,
+            mode="raw",
         )
+        print("RAW MODE:", raw_result)
     except Exception as e:
-        print("BAF blocked personal read:", e)
+        print("BAF blocked safe_read_file (raw):", e)
+
+    print("Read same personal file (metadata mode)")
+    try:
+        meta_result = session.safe_read_file(
+            "/Users/poovaragamukeshkumar/Documents/GitHub/baf-agent/examples/exam_helper_v1/data/personal_docs/college_id_mock_1.txt",
+            profile=profile,
+            mode="metadata",
+        )
+        print("METADATA MODE:", meta_result)
+    except Exception as e:
+        print("BAF blocked safe_read_file (metadata):", e)
 
     print("Try external HTTP (should be blocked or high risk)")
     try:
@@ -36,4 +49,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

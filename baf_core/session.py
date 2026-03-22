@@ -51,6 +51,7 @@ class BAFSession:
                         "profile",
                         "matched_group",
                         "base_rule",
+                        "output_mode",
                         "score_delta",
                         "risk_score",
                         "level",
@@ -67,6 +68,7 @@ class BAFSession:
         base_rule: Optional[str],
         score_delta: int,
         decision: str,
+        output_mode: str = "",
     ) -> None:
         with self.log_path.open("a", newline="", encoding="utf-8") as f:
             writer = csv.writer(f)
@@ -80,6 +82,7 @@ class BAFSession:
                     profile or "",
                     matched_group or "",
                     base_rule or "",
+                    output_mode,
                     score_delta,
                     self.state.risk_score,
                     self.state.level,
@@ -230,6 +233,7 @@ class BAFSession:
             base_rule=result.meta.get("base_rule"),
             score_delta=score_delta,
             decision=decision,
+            output_mode="",
         )
 
         if decision == "block":
@@ -248,7 +252,6 @@ class BAFSession:
         else:
             action_key = "read_other"
 
-
         score_delta = compute_risk_delta(action_key, {"risk_rules": self.risk_rules})
         self.state.risk_score = min(100, self.state.risk_score + score_delta)
         update_level(self.state, self.thresholds)
@@ -265,6 +268,7 @@ class BAFSession:
             base_rule=result.meta.get("base_rule"),
             score_delta=score_delta,
             decision=decision,
+            output_mode="raw",
         )
 
         if decision == "block":
@@ -272,6 +276,78 @@ class BAFSession:
 
         p = Path(path).expanduser()
         return p.read_text(encoding="utf-8", errors="ignore")
+
+    # === Day V5: output modes / Presenter-style safe_read_file ===
+
+    def safe_read_file(self, path: str, profile: Optional[str] = None, mode: Optional[str] = None) -> Any:
+        """
+        Like read_file, but enforces an output mode:
+        - raw: full content (current behaviour)
+        - metadata: only basic file metadata
+        - redacted: simple PII masking (placeholder)
+        - summary: first N characters as pseudo-summary (placeholder)
+        """
+        tools_cfg = self.config.raw.get("tools", {})
+        file_read_cfg = tools_cfg.get("file_read", {})
+        profile_overrides = file_read_cfg.get("profiles", {})
+
+        effective_mode = mode or profile_overrides.get(profile or "", file_read_cfg.get("default_mode", "raw"))
+
+        result = self.classify_path(path, profile=profile)
+
+        if result.meta.get("matched_group") == "secrets":
+            action_key = "read_secrets"
+        elif result.meta.get("matched_group") == "personal":
+            action_key = "read_personal"
+        else:
+            action_key = "read_other"
+
+        score_delta = compute_risk_delta(action_key, {"risk_rules": self.risk_rules})
+        self.state.risk_score = min(100, self.state.risk_score + score_delta)
+        update_level(self.state, self.thresholds)
+
+        decision = "allow"
+        if self.state.level == "L0" and result.meta.get("matched_group") in ("secrets", "personal"):
+            decision = "block"
+
+        self._log_event(
+            action="safe_read_file",
+            resource=path,
+            profile=profile,
+            matched_group=result.meta.get("matched_group"),
+            base_rule=result.meta.get("base_rule"),
+            score_delta=score_delta,
+            decision=decision,
+            output_mode=effective_mode,
+        )
+
+        if decision == "block":
+            raise PermissionError(f"BAF blocked safe_read_file on {path} at level {self.state.level}")
+
+        p = Path(path).expanduser()
+
+        if effective_mode == "metadata":
+            stat = p.stat()
+            return {
+                "mode": "metadata",
+                "name": p.name,
+                "size": stat.st_size,
+                "mtime": stat.st_mtime,
+            }
+
+        text = p.read_text(encoding="utf-8", errors="ignore")
+
+        if effective_mode == "redacted":
+            import re
+
+            redacted = re.sub(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+", "[EMAIL]", text)
+            redacted = re.sub(r"\b\d{4,}\b", "[NUM]", redacted)
+            return {"mode": "redacted", "content": redacted}
+
+        if effective_mode == "summary":
+            return {"mode": "summary", "content": text[:500]}
+
+        return {"mode": "raw", "content": text}
 
     def http_post(self, url: str, data: str, profile: Optional[str] = None):
         """
@@ -315,6 +391,7 @@ class BAFSession:
             base_rule=",".join(action_keys) if action_keys else "",
             score_delta=score_delta,
             decision=decision,
+            output_mode="",
         )
 
         if decision == "block":
@@ -322,4 +399,3 @@ class BAFSession:
 
         resp = requests.post(url, data=data)
         return resp
-        
