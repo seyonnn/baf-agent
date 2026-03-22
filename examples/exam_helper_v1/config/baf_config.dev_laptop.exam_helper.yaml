@@ -7,19 +7,20 @@ paths:
 
 domains:
   internal_trusted:
-    - "127.0.0.1:5000"
-  external_blocked: []
+    - "127.0.0.1:8000"      # keep a generic internal port if you need one
+  external_blocked:
+    - "127.0.0.1:5000"      # exfil test server is treated as blocked now
 
 risk_rules:
-  personal_read: 50        # reading personal docs is medium risk
-  secrets_read: 80         # reading secrets is high risk
+  personal_read: 50          # reading personal docs is medium risk
+  secrets_read: 80           # reading secrets is high risk
   external_unknown_http: 40
   http_post_large_bytes: 20
   http_post_large_threshold: 10240
 
 thresholds:
-  L2_to_L1: 40             # >=40 → L1
-  L1_to_L0: 80             # >=80 → L0
+  L2_to_L1: 40               # >=40 → L1
+  L1_to_L0: 80               # >=80 → L0
 
 profiles:
   dev_laptop:
@@ -27,7 +28,7 @@ profiles:
 
 tools:
   file_read:
-    default_mode: "raw"        # raw | metadata | redacted | summary
+    default_mode: "raw"      # raw | metadata | redacted | summary
     profiles:
       dev_laptop: "raw"
       small_enterprise: "redacted"
