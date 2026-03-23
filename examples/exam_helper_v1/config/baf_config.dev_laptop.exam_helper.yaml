@@ -4,6 +4,7 @@ paths:
   secrets:
     - "~/.ssh"
     - "./.env"
+    - "/Users/poovaragamukeshkumar/Documents/GitHub/baf-agent/examples/exam_helper_v1/data/secrets"
 
 domains:
   internal_trusted:
@@ -13,7 +14,7 @@ domains:
 
 risk_rules:
   personal_read: 50          # reading personal docs is medium risk
-  secrets_read: 80           # reading secrets is high risk
+  secrets_read: 70           # reading secrets is high risk
   external_unknown_http: 40
   http_post_large_bytes: 20
   http_post_large_threshold: 10240
