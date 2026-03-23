@@ -1,0 +1,51 @@
+paths:
+  hr: "/mnt/hr"
+  finance: "/mnt/finance"
+  legal: "/mnt/legal"
+  customer: "/mnt/customer"
+  secrets:
+    - "/mnt/hr"
+    - "/mnt/finance"
+    - "/mnt/legal"
+    - "/mnt/customer"
+
+domains:
+  internal_trusted:
+    - "api.internal.company.com"
+    - "auth.internal.company.com"
+  external_allow:
+    - "updates.vendor.com"
+  external_blocked:
+    - "127.0.0.1:5000"
+  http_policy:
+    default_post: "block"     # block POST to any domain not in internal_trusted or external_allow
+    default_get: "allow"
+
+risk_rules:
+  personal_read: 60
+  secrets_read: 80
+  external_unknown_http: 60
+  http_post_large_bytes: 30
+  http_post_large_threshold: 8192
+
+thresholds:
+  L2_to_L1: 40
+  L1_to_L0: 80
+
+profiles:
+  small_enterprise:
+    use_paths: ["hr", "finance", "legal", "customer", "secrets"]
+    http_profile: "small_enterprise"
+
+tools:
+  file_read:
+    default_mode: "metadata"
+    profiles:
+      dev_laptop: "raw"
+      small_enterprise: "redacted"
+
+  http_post:
+    default_action: "block"
+    profiles:
+      dev_laptop: "allow"
+      small_enterprise: "block"

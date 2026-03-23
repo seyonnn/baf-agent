@@ -3,33 +3,50 @@ paths:
   personal: "/Users/poovaragamukeshkumar/Documents/GitHub/baf-agent/examples/exam_helper_v1/data/personal_docs"
   secrets:
     - "~/.ssh"
+    - "~/.config"
     - "./.env"
+    - "**/.env"
+    - "/Users/poovaragamukeshkumar/Documents"
     - "/Users/poovaragamukeshkumar/Documents/GitHub/baf-agent/examples/exam_helper_v1/data/secrets"
 
 domains:
   internal_trusted:
-    - "127.0.0.1:8000"      # keep a generic internal port if you need one
+    - "127.0.0.1:8000"       # example internal service
+  external_allow:
+    - "api.github.com"
+    - "pypi.org"
+    - "pythonhosted.org"
   external_blocked:
-    - "127.0.0.1:5000"      # exfil test server is treated as blocked now
+    - "127.0.0.1:5000"       # exfil test server
+  http_policy:
+    default_post: "block"    # block POST to unknown domains by default
+    default_get: "allow"     # GET less sensitive, can be tuned later
 
 risk_rules:
-  personal_read: 50          # reading personal docs is medium risk
-  secrets_read: 70           # reading secrets is high risk
+  personal_read: 50           # reading personal docs is medium risk
+  secrets_read: 70            # reading secrets is high risk
   external_unknown_http: 40
   http_post_large_bytes: 20
   http_post_large_threshold: 10240
 
 thresholds:
-  L2_to_L1: 40               # >=40 → L1
-  L1_to_L0: 80               # >=80 → L0
+  L2_to_L1: 40                # >=40 → L1
+  L1_to_L0: 80                # >=80 → L0
 
 profiles:
   dev_laptop:
     use_paths: ["personal", "secrets"]
+    http_profile: "dev_laptop"
 
 tools:
   file_read:
-    default_mode: "raw"      # raw | metadata | redacted | summary
+    default_mode: "raw"       # raw | metadata | redacted | summary
     profiles:
       dev_laptop: "raw"
       small_enterprise: "redacted"
+
+  http_post:
+    default_action: "allow"   # allow | block | review
+    profiles:
+      dev_laptop: "allow"     # but combined with http_policy above: unknown domains -> block
+      small_enterprise: "block"
