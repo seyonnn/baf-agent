@@ -25,4 +25,5 @@ logs/
 *.tmp
 
 # Jupyter / notebooks (if you use later)
-.ipynb_checkpoints/
+.ipynb_checkpoints/.venv/
+.venv311/
