@@ -2,6 +2,7 @@
 
 import os
 import sys
+import yaml
 from typing import Optional, Dict, Any
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -11,61 +12,20 @@ if REPO_ROOT not in sys.path:
 from baf_core.config import BAFConfig
 from baf_core.session import BAFSession
 
+BAF_CONFIG_PATH = os.path.join(REPO_ROOT, "baf_config.dev_laptop.yaml")
 BAF_PROFILE = "dev_laptop"
 MCP_AGENT_ID = "mcp_baf_tools"
 
 _baf_session: Optional[BAFSession] = None
 
 
-def _build_minimal_raw_config() -> Dict[str, Any]:
-    """
-    Minimal raw config so BAFConfig(raw=...) and BAFSession work
-    without needing to load any external file.
-    Adjust paths/domains if you want stricter rules.
-    """
-    return {
-        "paths": {
-            # Treat a "secrets" directory as sensitive (adjust to your real path)
-            "secrets": ["./secrets"],
-            # Optional: personal files
-            "personal": ["./personal"],
-        },
-        "domains": {
-            "internal_trusted": ["127.0.0.1", "localhost"],
-        },
-        "risk_rules": {
-            "secrets_read": 80,
-            "personal_read": 40,
-            "read_other": 0,
-            "external_http": 40,
-            "large_http_post": 40,
-            "http_post_large_threshold": 10240,
-        },
-        "thresholds": {
-            "L2_to_L1": 40,
-            "L1_to_L0": 80,
-        },
-        "profiles": {
-            BAF_PROFILE: {
-                "use_paths": ["secrets", "personal"],
-            },
-        },
-        "tools": {
-            "file_read": {
-                "default_mode": "raw",
-                "profiles": {
-                    BAF_PROFILE: "raw",
-                },
-            },
-        },
-    }
-
-
 def get_baf_session() -> BAFSession:
     global _baf_session
     if _baf_session is None:
-        raw_cfg = _build_minimal_raw_config()
-        config = BAFConfig(raw=raw_cfg)
+        print("DEBUG BAF_CONFIG_PATH:", BAF_CONFIG_PATH)
+
+        # Use the same helper as LangChain: load from YAML file directly
+        config = BAFConfig.from_file(BAF_CONFIG_PATH)
         _baf_session = BAFSession(config=config, agent_id=MCP_AGENT_ID)
     return _baf_session
 
