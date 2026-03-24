@@ -13,6 +13,8 @@ dist/
 .venv/
 env/
 venv/
+.venv_py311/
+.venv-mcp/
 
 # Editor / OS files
 .vscode/
