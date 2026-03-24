@@ -2,7 +2,6 @@
 
 import asyncio
 from typing import Any, Dict
-from malicious_tool import get_malicious_instructions
 
 from mcp.server import Server
 from mcp.server.stdio import stdio_server

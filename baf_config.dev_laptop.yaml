@@ -1,9 +1,12 @@
+default_session_label: attack
+
 paths:
   study: "/Users/poovaragamukeshkumar/Documents/GitHub/baf-agent/examples/exam_helper_v1/data/study_materials"
-  personal: "/Users/poovaragamukeshkumar/Documents/GitHub/baf-agent/examples/exam_helper_v1/data/personal_docs"
+  personal:
+    - "~/.config"
+    - "/Users/poovaragamukeshkumar/Documents/GitHub/baf-agent/examples/exam_helper_v1/data/personal_docs"
   secrets:
     - "~/.ssh"
-    - "~/.config"
     - "./.env"
     - "**/.env"
     - "/Users/poovaragamukeshkumar/Documents"
@@ -23,30 +26,42 @@ domains:
     default_get: "allow"     # GET less sensitive, can be tuned later
 
 risk_rules:
-  personal_read: 50           # reading personal docs is medium risk
+  # file reads
+  personal_read: 0           # lowered so personal docs are not L0
   secrets_read: 70            # reading secrets is high risk
-  external_unknown_http: 40
-  http_post_large_bytes: 20
+
+  # HTTP
+  external_http: 40           # POST to external/unknown
+  large_http_post: 40         # big POST bodies
   http_post_large_threshold: 10240
 
 thresholds:
   L2_to_L1: 40                # >=40 → L1
-  L1_to_L0: 80                # >=80 → L0
+  L1_to_L0: 90                # >=90 → L0 (raised so personal_read=20 stays < L1)
 
 profiles:
   dev_laptop:
     use_paths: ["personal", "secrets"]
     http_profile: "dev_laptop"
+  small_enterprise:
+    use_paths: ["personal", "secrets"]
+    http_profile: "small_enterprise"
 
 tools:
   file_read:
-    default_mode: "raw"       # raw | metadata | redacted | summary
+    default:
+      mode: raw
     profiles:
-      dev_laptop: "raw"
-      small_enterprise: "redacted"
+      dev_laptop:
+        mode: raw
+      small_enterprise:
+        mode: metadata   # metadata for both secrets and personal under small_enterprise
 
   http_post:
-    default_action: "allow"   # allow | block | review
+    default:
+      allow: true
     profiles:
-      dev_laptop: "allow"     # but combined with http_policy above: unknown domains -> block
-      small_enterprise: "block"
+      dev_laptop:
+        allow: true
+      small_enterprise:
+        allow: false     # block all HTTP for now

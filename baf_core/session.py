@@ -1,3 +1,5 @@
+# baf_core/session.py
+
 import csv
 from dataclasses import dataclass
 from datetime import datetime
@@ -18,12 +20,19 @@ class BAFClassificationResult:
 
 
 class BAFSession:
-    def __init__(self, config: BAFConfig, agent_id: str = "exam_helper", session_id: Optional[str] = None):
+    def __init__(
+        self,
+        config: BAFConfig,
+        agent_id: str = "exam_helper",
+        session_id: Optional[str] = None,
+        session_label: Optional[str] = None,
+    ):
         self.config = config
         raw = config.raw
 
         self.agent_id = agent_id
         self.session_id = session_id or datetime.utcnow().strftime("%Y%m%d%H%M%S")
+        self.session_label: Optional[str] = session_label
 
         self.paths: Dict[str, Any] = raw.get("paths", {})
         self.domains: Dict[str, Any] = raw.get("domains", {})
@@ -43,14 +52,17 @@ class BAFSession:
                 writer = csv.writer(f)
                 writer.writerow(
                     [
+                        "schema_version",
                         "timestamp",
                         "session_id",
                         "agent_id",
+                        "session_label",
                         "action",
                         "resource",
                         "profile",
                         "matched_group",
                         "base_rule",
+                        "domain_category",
                         "output_mode",
                         "score_delta",
                         "risk_score",
@@ -69,19 +81,23 @@ class BAFSession:
         score_delta: int,
         decision: str,
         output_mode: str = "",
+        domain_category: str = "",
     ) -> None:
         with self.log_path.open("a", newline="", encoding="utf-8") as f:
             writer = csv.writer(f)
             writer.writerow(
                 [
-                    datetime.utcnow().isoformat(),
+                    "v1",  # schema_version
+                    datetime.utcnow().isoformat() + "Z",
                     self.session_id,
                     self.agent_id,
+                    self.session_label or "",
                     action,
                     resource,
                     profile or "",
                     matched_group or "",
                     base_rule or "",
+                    domain_category,
                     output_mode,
                     score_delta,
                     self.state.risk_score,
@@ -128,7 +144,6 @@ class BAFSession:
 
         # Normalize configured paths to absolute for comparison
         for group_name, cfg in self.paths.items():
-            # cfg can be a string or a list
             if isinstance(cfg, str):
                 dirs = [cfg]
             else:
@@ -177,7 +192,6 @@ class BAFSession:
         )
 
     def classify_domain(self, domain: str, profile: Optional[str] = None) -> BAFClassificationResult:
-        # To be extended later if you want a BAFClassificationResult for domains
         return BAFClassificationResult(
             kind="domain",
             value=domain,
@@ -186,7 +200,7 @@ class BAFSession:
             meta={"profile": profile},
         )
 
-    # === Helpers for Day V3 ===
+    # === Helpers for domain categorization ===
 
     def _categorize_domain(self, url: str) -> str:
         """Return domain category: internal_known or external_unknown."""
@@ -204,12 +218,11 @@ class BAFSession:
         except Exception:
             return "none"
 
-    # === New Day V3 wrappers ===
+    # === list_dir / read_file / safe_read_file ===
 
     def list_dir(self, path: str, profile: Optional[str] = None) -> List[str]:
         result = self.classify_path(path, profile=profile)
 
-        # Map group to action
         if result.meta.get("matched_group") == "secrets":
             action_key = "read_secrets"
         elif result.meta.get("matched_group") == "personal":
@@ -277,21 +290,31 @@ class BAFSession:
         p = Path(path).expanduser()
         return p.read_text(encoding="utf-8", errors="ignore")
 
-    # === Day V5: output modes / Presenter-style safe_read_file ===
-
     def safe_read_file(self, path: str, profile: Optional[str] = None, mode: Optional[str] = None) -> Any:
-        """
-        Like read_file, but enforces an output mode:
-        - raw: full content (current behaviour)
-        - metadata: only basic file metadata
-        - redacted: simple PII masking (placeholder)
-        - summary: first N characters as pseudo-summary (placeholder)
-        """
         tools_cfg = self.config.raw.get("tools", {})
         file_read_cfg = tools_cfg.get("file_read", {})
         profile_overrides = file_read_cfg.get("profiles", {})
 
-        effective_mode = mode or profile_overrides.get(profile or "", file_read_cfg.get("default_mode", "raw"))
+        # Determine effective_mode from explicit arg or config
+        if mode is not None:
+            effective_mode = mode
+        else:
+            if profile is not None and profile in profile_overrides:
+                # profile_overrides[profile] is expected to be a dict like {"mode": "raw"} or {"mode": "metadata"}
+                eff = profile_overrides[profile]
+                if isinstance(eff, dict):
+                    effective_mode = eff.get("mode", "raw")
+                else:
+                    effective_mode = eff
+            else:
+                # default: support both old "default_mode" and nested default.mode
+                if "default_mode" in file_read_cfg:
+                    effective_mode = file_read_cfg.get("default_mode", "raw")
+                else:
+                    default_cfg = file_read_cfg.get("default", {})
+                    effective_mode = default_cfg.get("mode", "raw")
+
+        print("DEBUG safe_read_file profile=", profile, "mode_arg=", mode, "effective_mode=", effective_mode)
 
         result = self.classify_path(path, profile=profile)
 
@@ -318,35 +341,40 @@ class BAFSession:
             base_rule=result.meta.get("base_rule"),
             score_delta=score_delta,
             decision=decision,
-            output_mode=effective_mode,
+            output_mode=str(effective_mode),
         )
 
         if decision == "block":
             raise PermissionError(f"BAF blocked safe_read_file on {path} at level {self.state.level}")
 
         p = Path(path).expanduser()
+        text = p.read_text(encoding="utf-8", errors="ignore")
 
-        if effective_mode == "metadata":
+        # Apply output shaping based on effective_mode
+        mode_cfg = effective_mode
+
+        if mode_cfg == "metadata":
+            # Return summary/preview, not full content
             stat = p.stat()
             return {
                 "mode": "metadata",
                 "name": p.name,
                 "size": stat.st_size,
                 "mtime": stat.st_mtime,
+                "preview": text[:80],
             }
 
-        text = p.read_text(encoding="utf-8", errors="ignore")
-
-        if effective_mode == "redacted":
+        if mode_cfg == "redacted":
             import re
 
             redacted = re.sub(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+", "[EMAIL]", text)
             redacted = re.sub(r"\b\d{4,}\b", "[NUM]", redacted)
             return {"mode": "redacted", "content": redacted}
 
-        if effective_mode == "summary":
+        if mode_cfg == "summary":
             return {"mode": "summary", "content": text[:500]}
 
+        # default: raw
         return {"mode": "raw", "content": text}
 
     def http_post(self, url: str, data: str, profile: Optional[str] = None):
@@ -358,7 +386,12 @@ class BAFSession:
         domain_category = self._categorize_domain(url)
         nbytes = len(data.encode("utf-8", errors="ignore"))
 
-        # Determine logical action keys for risk
+        # HTTP policy from config (for future extensions)
+        tools_cfg = self.config.raw.get("tools", {})
+        http_cfg = tools_cfg.get("http_post", {})
+        http_profiles = http_cfg.get("profiles", {})
+        profile_policy = http_profiles.get(profile or "", http_cfg.get("default_action", "allow"))
+
         action_keys: List[str] = []
         if domain_category == "external_unknown":
             action_keys.append("external_http")
@@ -367,7 +400,6 @@ class BAFSession:
         if nbytes > threshold:
             action_keys.append("large_http_post")
 
-        # Compute combined risk delta
         score_delta = 0
         for key in action_keys:
             score_delta += compute_risk_delta(key, {"risk_rules": self.risk_rules})
@@ -376,12 +408,22 @@ class BAFSession:
             self.state.risk_score = min(100, self.state.risk_score + score_delta)
             update_level(self.state, self.thresholds)
 
-        # Enforcement rules (similar spirit to v1)
         decision = "allow"
-        if self.state.level in {"L1", "L2"} and domain_category == "external_unknown":
+
+        # Profile-level hard block (e.g., small_enterprise)
+        if profile_policy == "block":
             decision = "block"
-        if self.state.level == "L0":
-            decision = "block"
+        else:
+            # Risk-based blocking
+            if self.state.level in {"L1", "L2"} and domain_category == "external_unknown":
+                decision = "block"
+            if self.state.level == "L0":
+                decision = "block"
+
+        print(
+            "DEBUG http_post profile:", profile,
+            "domain_category:", domain_category
+        )
 
         self._log_event(
             action="http_post",
@@ -392,10 +434,14 @@ class BAFSession:
             score_delta=score_delta,
             decision=decision,
             output_mode="",
+            domain_category=domain_category,
         )
 
         if decision == "block":
-            raise PermissionError(f"BAF blocked http_post to {url} at level {self.state.level}")
+            label = self.session_label or "unlabeled"
+            raise PermissionError(
+                f"BAF blocked http_post to {url} at level {self.state.level} (session_label={label})"
+            )
 
         resp = requests.post(url, data=data)
         return resp

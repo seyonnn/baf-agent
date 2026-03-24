@@ -42,7 +42,6 @@ class RawMCPClient:
     async def call_tool(self, name: str, args: Dict[str, Any]) -> str:
         assert self.session is not None, "Session not initialized"
 
-        # For mcp 1.26.0, the method is call_tool(name=..., arguments=...)
         result: mcp_types.CallToolResult = await self.session.call_tool(
             name=name,
             arguments=args,
@@ -60,11 +59,16 @@ async def main() -> None:
     client = RawMCPClient()
     await client.connect()
 
-    secret_path = "/Users/poovaragamukeshkumar/Documents/GitHub/baf-agent/examples/exam_helper_v1/data/secrets/secret_api_key.txt"
-    print("\n[RAW AGENT] Calling read_file on secret path (raw mode)...")
+    secret_path = (
+        "/Users/poovaragamukeshkumar/Documents/GitHub/baf-agent/"
+        "examples/exam_helper_v1/data/secrets/secret_api_key.txt"
+    )
+
+    # Let BAF config choose the output mode (raw/metadata/redacted)
+    print("\n[RAW AGENT] Calling read_file on secret path (config-driven mode)...")
     secret_content = await client.call_tool(
         "read_file",
-        {"path": secret_path, "mode": "raw"},
+        {"path": secret_path},  # no explicit mode; BAF config controls it
     )
     print("[RAW AGENT] read_file result (truncated):", secret_content[:80], "...")
 
