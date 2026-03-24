@@ -127,6 +127,21 @@ class BAFSession:
             return "L1"
         return "L2"      # lowest risk
 
+    def _canonicalize_path(self, path: str) -> Path:
+        """
+        Normalize and canonicalize a filesystem path.
+
+        - Expands ~
+        - Converts to absolute
+        - Resolves .. and symlinks (best-effort)
+        """
+        p = Path(path).expanduser()
+        try:
+            # strict=False so missing files still produce a normalized path
+            return p.resolve(strict=False)
+        except Exception:
+            return p.absolute()
+
     def classify_path(self, path: str, profile: Optional[str] = None) -> BAFClassificationResult:
         """
         Simple semantics:
@@ -134,10 +149,10 @@ class BAFSession:
         - Currently:
             secrets -> secrets_read
             personal -> personal_read
-        - Otherwise: treated as low risk.
+        - Otherwise: treated as low or high risk depending on whether use_paths is configured.
         """
         use_paths = self._profile_use_paths(profile)
-        p = Path(path).expanduser().resolve()
+        p = self._canonicalize_path(path)
 
         matched_group: Optional[str] = None
         matched_root: Optional[str] = None
@@ -160,6 +175,22 @@ class BAFSession:
                     continue
             if matched_group:
                 break
+
+        # If profile declares use_paths, anything outside those roots is treated as high risk.
+        if use_paths and not matched_group:
+            return BAFClassificationResult(
+                kind="path",
+                value=str(p),
+                category="L0",
+                risk_score=1.0,
+                meta={
+                    "profile": profile,
+                    "matched_group": None,
+                    "matched_root": None,
+                    "base_rule": None,
+                    "score": 100,
+                },
+            )
 
         # default score: 0 (L2)
         score = 0
@@ -240,7 +271,7 @@ class BAFSession:
 
         self._log_event(
             action="list_dir",
-            resource=path,
+            resource=str(self._canonicalize_path(path)),
             profile=profile,
             matched_group=result.meta.get("matched_group"),
             base_rule=result.meta.get("base_rule"),
@@ -252,7 +283,7 @@ class BAFSession:
         if decision == "block":
             raise PermissionError(f"BAF blocked list_dir on {path} at level {self.state.level}")
 
-        p = Path(path).expanduser()
+        p = self._canonicalize_path(path)
         return [str(child) for child in p.iterdir()]
 
     def read_file(self, path: str, profile: Optional[str] = None) -> str:
@@ -275,7 +306,7 @@ class BAFSession:
 
         self._log_event(
             action="read_file",
-            resource=path,
+            resource=str(self._canonicalize_path(path)),
             profile=profile,
             matched_group=result.meta.get("matched_group"),
             base_rule=result.meta.get("base_rule"),
@@ -287,7 +318,7 @@ class BAFSession:
         if decision == "block":
             raise PermissionError(f"BAF blocked read_file on {path} at level {self.state.level}")
 
-        p = Path(path).expanduser()
+        p = self._canonicalize_path(path)
         return p.read_text(encoding="utf-8", errors="ignore")
 
     def safe_read_file(self, path: str, profile: Optional[str] = None, mode: Optional[str] = None) -> Any:
@@ -300,14 +331,12 @@ class BAFSession:
             effective_mode = mode
         else:
             if profile is not None and profile in profile_overrides:
-                # profile_overrides[profile] is expected to be a dict like {"mode": "raw"} or {"mode": "metadata"}
                 eff = profile_overrides[profile]
                 if isinstance(eff, dict):
                     effective_mode = eff.get("mode", "raw")
                 else:
                     effective_mode = eff
             else:
-                # default: support both old "default_mode" and nested default.mode
                 if "default_mode" in file_read_cfg:
                     effective_mode = file_read_cfg.get("default_mode", "raw")
                 else:
@@ -329,13 +358,15 @@ class BAFSession:
         self.state.risk_score = min(100, self.state.risk_score + score_delta)
         update_level(self.state, self.thresholds)
 
+        canonical = self._canonicalize_path(path)
+
         decision = "allow"
         if self.state.level == "L0" and result.meta.get("matched_group") in ("secrets", "personal"):
             decision = "block"
 
         self._log_event(
             action="safe_read_file",
-            resource=path,
+            resource=str(canonical),
             profile=profile,
             matched_group=result.meta.get("matched_group"),
             base_rule=result.meta.get("base_rule"),
@@ -347,14 +378,12 @@ class BAFSession:
         if decision == "block":
             raise PermissionError(f"BAF blocked safe_read_file on {path} at level {self.state.level}")
 
-        p = Path(path).expanduser()
+        p = canonical
         text = p.read_text(encoding="utf-8", errors="ignore")
 
-        # Apply output shaping based on effective_mode
         mode_cfg = effective_mode
 
         if mode_cfg == "metadata":
-            # Return summary/preview, not full content
             stat = p.stat()
             return {
                 "mode": "metadata",
@@ -374,7 +403,6 @@ class BAFSession:
         if mode_cfg == "summary":
             return {"mode": "summary", "content": text[:500]}
 
-        # default: raw
         return {"mode": "raw", "content": text}
 
     def http_post(self, url: str, data: str, profile: Optional[str] = None):
@@ -386,11 +414,29 @@ class BAFSession:
         domain_category = self._categorize_domain(url)
         nbytes = len(data.encode("utf-8", errors="ignore"))
 
-        # HTTP policy from config (for future extensions)
         tools_cfg = self.config.raw.get("tools", {})
         http_cfg = tools_cfg.get("http_post", {})
         http_profiles = http_cfg.get("profiles", {})
         profile_policy = http_profiles.get(profile or "", http_cfg.get("default_action", "allow"))
+
+        # New: basic HTTP limits (payload size + timeout) [web:768][web:752]
+        max_bytes = int(http_cfg.get("max_bytes", 1024 * 1024))  # 1 MB default
+        timeout_seconds = float(http_cfg.get("timeout_seconds", 5.0))  # 5s default
+        if nbytes > max_bytes:
+            self._log_event(
+                action="http_post",
+                resource=url,
+                profile=profile,
+                matched_group=None,
+                base_rule="payload_too_large",
+                score_delta=0,
+                decision="block",
+                output_mode="",
+                domain_category=domain_category,
+            )
+            raise PermissionError(
+                f"BAF blocked http_post to {url}: payload too large ({nbytes} bytes > {max_bytes})"
+            )
 
         action_keys: List[str] = []
         if domain_category == "external_unknown":
@@ -410,11 +456,9 @@ class BAFSession:
 
         decision = "allow"
 
-        # Profile-level hard block (e.g., small_enterprise)
         if profile_policy == "block":
             decision = "block"
         else:
-            # Risk-based blocking
             if self.state.level in {"L1", "L2"} and domain_category == "external_unknown":
                 decision = "block"
             if self.state.level == "L0":
@@ -443,5 +487,5 @@ class BAFSession:
                 f"BAF blocked http_post to {url} at level {self.state.level} (session_label={label})"
             )
 
-        resp = requests.post(url, data=data)
+        resp = requests.post(url, data=data, timeout=timeout_seconds)
         return resp
