@@ -49,7 +49,7 @@ v1 is still here as a documented case study; v2 is what you should use in your o
 This assumes Python 3.9 and a virtualenv.
 
 ```bash
-git clone https://github.com/<your-org>/baf-agent.git
+git clone https://github.com/seyonnn/baf-agent.git
 cd baf-agent
 
 python -m venv .venv
